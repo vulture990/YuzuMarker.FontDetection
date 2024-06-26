@@ -3,6 +3,7 @@ import random
 import requests
 from .font import DSFont
 from .helper import char_in_font
+import logging
 
 __all__ = [
     "random_char",
@@ -37,6 +38,7 @@ class UnqualifiedFontException(Exception):
         self.font = font
 
 
+
 def random_char(length: int, font: DSFont, char_set: str) -> str:
     assert length > 0
     assert len(char_set) > 0
@@ -49,11 +51,32 @@ def random_char(length: int, font: DSFont, char_set: str) -> str:
             ret += char
         else:
             fail_cnt += 1
-            print(f"FAILING {fail_cnt} for {font.path}")
+            logging.debug(f"FAILING {fail_cnt} for {font.path} with char {char}")
             if fail_cnt > 2000:
                 raise UnqualifiedFontException(font)
 
     return ret
+
+# Ensure logging is enabled
+logging.basicConfig(level=logging.DEBUG)
+
+# def random_char(length: int, font: DSFont, char_set: str) -> str:
+#     assert length > 0
+#     assert len(char_set) > 0
+
+#     ret = ""
+#     fail_cnt = 0
+#     while len(ret) < length:
+#         char = char_set[random.randint(0, len(char_set) - 1)]
+#         if char_in_font(char, font.path):
+#             ret += char
+#         else:
+#             fail_cnt += 1
+#             print(f"FAILING {fail_cnt} for {font.path}")
+#             if fail_cnt > 2000:
+#                 raise UnqualifiedFontException(font)
+
+#     return ret
 
 
 class CorpusGenerationConfig(object):
@@ -86,6 +109,8 @@ class CommonCorpusGenerator(object):
             lines.append(self.generate_line(num_chars, font))
 
         return "\n".join(lines)
+
+
 
 
 class JapaneseUtaNetCorpusGenerator(CommonCorpusGenerator):
@@ -181,6 +206,11 @@ class RandomCorpusGeneratorWithEnglish(CommonCorpusGenerator):
                 return ret
         return generate_corpus
 
+class EnglishRandomCorpusGenerator(RandomCorpusGeneratorWithEnglish):
+    def __init__(self, prob: float = 0.3, when_length_greater_than: int = 10):
+        english_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        super().__init__(english_alphabet, prob, when_length_greater_than)
+
 
 class SimplifiedChineseRandomCorpusGeneratorWithEnglish(
     RandomCorpusGeneratorWithEnglish
@@ -208,6 +238,8 @@ class CorpusGeneratorManager:
             "zh-Hans": SimplifiedChineseRandomCorpusGeneratorWithEnglish(),
             "zh-Hant": TraditionalChineseRandomCorpusGeneratorWithEnglish(),
             "ko": KoreanRandomCorpusGeneratorWithEnglish(),
+            "en": EnglishRandomCorpusGenerator(),  # Add this line for English support
+
         }
 
     def _get_generator(
