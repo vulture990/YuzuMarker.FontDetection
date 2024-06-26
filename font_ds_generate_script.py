@@ -70,9 +70,9 @@ def generate_dataset(dataset_type: str, cnt: int):
         if exclusion_rule(font):
             print(f"Excluded font: {font.path}")
             return
-        if font.path in runtime_exclusion_list:
-            print(f"Excluded font: {font.path}")
-            return
+        # if font.path in runtime_exclusion_list:
+        #     print(f"Excluded font: {font.path}")
+        #     return
 
         while True:
             try:
