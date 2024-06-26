@@ -58,7 +58,7 @@ def random_char(length: int, font: DSFont, char_set: str) -> str:
     return ret
 
 # Ensure logging is enabled
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 # def random_char(length: int, font: DSFont, char_set: str) -> str:
 #     assert length > 0
