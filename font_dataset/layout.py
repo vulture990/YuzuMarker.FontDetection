@@ -242,6 +242,21 @@ class TextSizeTooSmallException(Exception):
         super().__init__(f"Text Size Too Small")
 
 
+def get_average_color(image):
+    image = image.convert('RGB')
+    pixels = list(image.getdata())
+    num_pixels = len(pixels)
+    avg_color = tuple(sum(pixels[i][j] for i in range(num_pixels)) // num_pixels for j in range(3))
+    return avg_color
+
+def luminance(color):
+    return 0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]
+
+def get_contrasting_color(color):
+    if luminance(color) > 128:
+        return (0, 0, 0)  # dark text
+    else:
+        return (255, 255, 255)  # light text
 
 def generate_font_image(img_path: str, font: DSFont, corpus_manager: CorpusGeneratorManager) -> Tuple[Image.Image, FontLabel]:
     im = Image.open(img_path)
@@ -264,20 +279,14 @@ def generate_font_image(img_path: str, font: DSFont, corpus_manager: CorpusGener
     else:
         text = corpus_manager.generate(long_condition, font, render_language)
 
-    if random.random() < gray_ratio:
-        text_color = random.randint(0, 255)
-        text_color = (text_color, text_color, text_color)
-        stroke_ratio = 0
-        stroke_color = None
-        im = im.convert("L")
-    else:
-        text_color = random_color()
-        if random.random() < pure_color_ratio:
-            stroke_ratio = 0
-            stroke_color = None
-        else:
-            stroke_ratio = random.random() * stroke_width_max_ratio
-            stroke_color = random_color()
+    avg_color = get_average_color(im)
+    text_color = get_contrasting_color(avg_color)
+
+    stroke_ratio = 0
+    stroke_color = None
+    if random.random() >= gray_ratio:
+        stroke_ratio = random.random() * stroke_width_max_ratio
+        stroke_color = random_color()
 
     line_spacing_ratio = (random.random() * (line_spacing_max_ratio - line_spacing_min_ratio) + line_spacing_min_ratio)
     render_calculation_stroke_width = int(stroke_ratio * render_calculation_size)
