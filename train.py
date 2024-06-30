@@ -136,7 +136,7 @@ lambda_regression = 1.0
 regression_use_tanh = False
 
 num_warmup_epochs = 5
-num_epochs = 20
+num_epochs = 50
 
 log_every_n_steps = 100
 
